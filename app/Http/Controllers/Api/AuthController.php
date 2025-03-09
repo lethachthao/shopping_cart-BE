@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -42,4 +44,32 @@ class AuthController extends Controller
             'user' => $request->user()
         ]);
     }
+
+    public function register(Request $request) {
+        // Kiểm tra dữ liệu đầu vào
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6',
+            'avatar' => 'nullable|string',
+            'role' => 'nullable|string'
+        ]);
+
+        // Tạo user mới
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'avatar' => $request->avatar ?? '', // Đảm bảo avatar không bị NULL
+            'role' => $request->role ?? 'user'
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Đăng ký thành công',
+            'user' => $user
+        ], 201);
+    }
+
+
 }

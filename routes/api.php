@@ -20,8 +20,10 @@ Route::apiResource('products', ProductController::class);
 Route::post('products/{id}', [ProductController::class, 'update']);
 
 
+Route::post('/register', [AuthController::class, 'register']);
 Route::post("/login", [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->get("/profile", [AuthController::class, 'profile']);
+
 
 
 
