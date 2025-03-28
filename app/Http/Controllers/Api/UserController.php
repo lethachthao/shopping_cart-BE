@@ -20,6 +20,8 @@ class UserController extends Controller
                 'email' => $user->email, // Dùng email làm description (hoặc tùy chỉnh)
                 'password' => $user->password,
                 'avatar' => $user->avatar,
+                'address' => $user->address,
+                'phone_number' => $user->phone_number,
                 'role' => $user->role,
             ];
         });
@@ -34,20 +36,24 @@ class UserController extends Controller
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
+            'address' => 'string',
+            'phone_number' => 'string',
             'password' => 'string|min:6',
             'avatar' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg',
             'role' => 'nullable|string', // cho phép role là null hoặc không có
         ]);
 
         // Nếu có ảnh, xử lý lưu ảnh
-    $avatarPath = $request->hasFile('avatar') && $request->file('avatar')->isValid()
-        ? $request->file('avatar')->store('avatars', 'public') // Lưu vào thư mục 'avatars' trong public storage
-        : null;
+        $avatarPath = $request->hasFile('avatar') && $request->file('avatar')->isValid()
+            ? $request->file('avatar')->store('avatars', 'public') // Lưu vào thư mục 'avatars' trong public storage
+            : null;
 
         // Tạo mới người dùng với giá trị mặc định nếu không có trường 'avatar' và 'role'
         $user = User::create([
             'name' => $validatedData['name'],
             'email' => $validatedData['email'],
+            'address' => $validatedData['address'],
+            'phone_number' => $validatedData['phone_number'],
             'avatar' => $avatarPath, // Gán mặc định nếu không có avatar
             'role' => $validatedData['role'] ?? 'user', // Gán giá trị mặc định là 'user'
             'password' => Hash::make($validatedData['password'] ?? 'defaultPassword'),
@@ -90,6 +96,8 @@ class UserController extends Controller
             'name' => 'nullable|string|max:255', // Cho phép cập nhật hoặc bỏ qua trường này
             'email' => 'nullable|email|unique:users,email,' . $user->id, // Kiểm tra email đã tồn tại, nhưng bỏ qua người dùng hiện tại
             'password' => 'nullable|string|min:6', // Nếu có mật khẩu, thì phải có ít nhất 6 ký tự
+            'address' => 'string',
+            'phone_number' => 'string',
             'avatar' => 'nullable|file|mimes:jpeg,png,jpg,gif,svg', // Kiểm tra ảnh đại diện nếu có
             'role' => 'nullable|string', // Cho phép trường role là null hoặc không có
         ]);
@@ -112,6 +120,8 @@ class UserController extends Controller
         $user->update([
             'name' => $validatedData['name'] ?? $user->name, // Cập nhật tên nếu có
             'email' => $validatedData['email'] ?? $user->email, // Cập nhật email nếu có
+            'address' => $validatedData['address'] ?? $user->address, // Cập nhật email nếu có
+            'phone_number' => $validatedData['phone_number'] ?? $user->phone_number, // Cập nhật email nếu có
             'password' => isset($validatedData['password']) ? Hash::make($validatedData['password']) : $user->password, // Cập nhật mật khẩu nếu có
             'avatar' => $avatarPath, // Cập nhật avatar nếu có
             'role' => $validatedData['role'] ?? $user->role, // Cập nhật role nếu có
